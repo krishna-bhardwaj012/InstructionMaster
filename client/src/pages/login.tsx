@@ -3,11 +3,30 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { EmailInput } from "@/components/ui/email-input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap, Eye, EyeOff } from "lucide-react";
 import { useLocation } from "wouter";
@@ -54,6 +73,10 @@ export default function Login() {
     mode: "onChange",
   });
 
+  // Debug form state
+  console.log('Register form values:', registerForm.getValues());
+  console.log('Register form errors:', registerForm.formState.errors);
+
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
       const response = await fetch('/api/auth/login', {
@@ -77,7 +100,7 @@ export default function Login() {
       });
       setLocation('/');
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Login failed",
         description: "Invalid email or password",
@@ -112,7 +135,7 @@ export default function Login() {
     onError: (error) => {
       toast({
         title: "Registration failed",
-        description: error.message.includes('User already exists') 
+        description: error.message.includes('User already exists')
           ? "An account with this email already exists"
           : "Failed to create account",
         variant: "destructive",
@@ -125,7 +148,6 @@ export default function Login() {
   };
 
   const onRegisterSubmit = (data: RegisterFormData) => {
-    console.log('Registration data:', data);
     registerMutation.mutate(data);
   };
 
@@ -271,14 +293,11 @@ export default function Login() {
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="Enter your email (e.g., john@example.com)"
-                          autoComplete="email"
-                          spellCheck="false"
-                          value={field.value || ""}
-                          onChange={field.onChange}
+                        <EmailInput
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
                           onBlur={field.onBlur}
+                          placeholder="Enter your email (e.g., john@example.com)"
                           name={field.name}
                         />
                       </FormControl>
