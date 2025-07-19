@@ -121,7 +121,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(assignments)
       .where(eq(assignments.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async createSubmission(submission: InsertSubmission): Promise<Submission> {

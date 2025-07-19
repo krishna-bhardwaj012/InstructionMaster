@@ -179,6 +179,8 @@ export default function Login() {
                         <Input
                           type="email"
                           placeholder="Enter your email"
+                          autoComplete="email"
+                          spellCheck="false"
                           {...field}
                         />
                       </FormControl>
@@ -270,6 +272,8 @@ export default function Login() {
                         <Input
                           type="email"
                           placeholder="Enter your email"
+                          autoComplete="email"
+                          spellCheck="false"
                           {...field}
                         />
                       </FormControl>
