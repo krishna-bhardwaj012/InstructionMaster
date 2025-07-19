@@ -18,7 +18,7 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -51,6 +51,7 @@ export default function Login() {
       lastName: "",
       role: undefined,
     },
+    mode: "onChange",
   });
 
   const loginMutation = useMutation({
@@ -124,6 +125,7 @@ export default function Login() {
   };
 
   const onRegisterSubmit = (data: RegisterFormData) => {
+    console.log('Registration data:', data);
     registerMutation.mutate(data);
   };
 
@@ -271,10 +273,13 @@ export default function Login() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="Enter your email (e.g., john@example.com)"
                           autoComplete="email"
                           spellCheck="false"
-                          {...field}
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
                         />
                       </FormControl>
                       <FormMessage />
