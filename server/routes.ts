@@ -12,8 +12,19 @@ import {
   insertSubmissionSchema,
   gradeSubmissionSchema
 } from "@shared/schema";
+import { z } from "zod";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Create a custom assignment schema that handles string-to-date conversion
+const createAssignmentSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  dueDate: z.string().transform((str) => new Date(str)),
+  maxPoints: z.number().min(1, "Points must be at least 1"),
+  allowLateSubmissions: z.boolean(),
+  requireFileUpload: z.boolean(),
+});
 
 // Multer configuration for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -157,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only teachers can create assignments' });
       }
 
-      const assignmentData = insertAssignmentSchema.parse(req.body);
+      const assignmentData = createAssignmentSchema.parse(req.body);
       const assignment = await storage.createAssignment(assignmentData, req.user.id);
       res.json(assignment);
     } catch (error) {
