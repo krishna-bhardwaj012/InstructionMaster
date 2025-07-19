@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -52,6 +52,7 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -94,11 +95,14 @@ export default function Login() {
     },
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
+      // Invalidate auth queries to refetch user data
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
       });
-      setLocation('/');
+      // Small delay to ensure query invalidation completes
+      setTimeout(() => setLocation('/'), 100);
     },
     onError: () => {
       toast({
@@ -126,11 +130,14 @@ export default function Login() {
     },
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
+      // Invalidate auth queries to refetch user data
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
         title: "Account created!",
         description: "Welcome to the Assignment Tracker.",
       });
-      setLocation('/');
+      // Small delay to ensure query invalidation completes
+      setTimeout(() => setLocation('/'), 100);
     },
     onError: (error) => {
       toast({
