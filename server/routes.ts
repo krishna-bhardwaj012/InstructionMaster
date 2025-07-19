@@ -168,7 +168,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only teachers can create assignments' });
       }
 
-      const assignmentData = createAssignmentSchema.parse(req.body);
+      console.log('Received request body:', req.body);
+      
+      // Manual conversion to ensure it works
+      const rawData = req.body;
+      const assignmentData = {
+        title: rawData.title,
+        description: rawData.description,
+        dueDate: new Date(rawData.dueDate),
+        maxPoints: Number(rawData.maxPoints),
+        allowLateSubmissions: Boolean(rawData.allowLateSubmissions),
+        requireFileUpload: Boolean(rawData.requireFileUpload),
+      };
+      
+      console.log('Converted assignment data:', assignmentData);
+      
       const assignment = await storage.createAssignment(assignmentData, req.user.id);
       res.json(assignment);
     } catch (error) {
