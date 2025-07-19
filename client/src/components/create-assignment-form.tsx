@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { insertAssignmentSchema } from "@shared/schema";
+import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -19,25 +20,23 @@ interface CreateAssignmentFormProps {
   onSuccess: () => void;
 }
 
-type FormData = {
-  title: string;
-  description: string;
-  dueDate: string;
-  maxPoints: number;
-  allowLateSubmissions: boolean;
-  requireFileUpload: boolean;
-};
+// Create a schema that accepts string for dueDate and converts it to Date
+const createAssignmentFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  dueDate: z.string().min(1, "Due date is required"),
+  maxPoints: z.number().min(1, "Points must be at least 1"),
+  allowLateSubmissions: z.boolean(),
+  requireFileUpload: z.boolean(),
+});
+
+type FormData = z.infer<typeof createAssignmentFormSchema>;
 
 export default function CreateAssignmentForm({ isOpen, onClose, onSuccess }: CreateAssignmentFormProps) {
   const { toast } = useToast();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(insertAssignmentSchema.extend({
-      dueDate: insertAssignmentSchema.shape.dueDate.transform(date => date.toISOString()),
-    }).transform(data => ({
-      ...data,
-      dueDate: new Date(data.dueDate),
-    }))),
+    resolver: zodResolver(createAssignmentFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -92,7 +91,7 @@ export default function CreateAssignmentForm({ isOpen, onClose, onSuccess }: Cre
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="create-assignment-description">
         <DialogHeader>
           <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl font-bold">Create New Assignment</DialogTitle>
@@ -101,6 +100,9 @@ export default function CreateAssignmentForm({ isOpen, onClose, onSuccess }: Cre
             </Button>
           </div>
         </DialogHeader>
+        <div id="create-assignment-description" className="sr-only">
+          Create a new assignment with title, description, due date, and settings
+        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
